@@ -21,6 +21,8 @@ The script rebuilds the stellar sample and model curves, checks them against the
 git diff --exit-code -- results/m67_residuals_by_g.csv experiment/results/
 ```
 
+The [original run log](results/week6_runs.csv) records the dry run, smoke test, synthetic sweep, timing measurements and full analysis reported in METHOD.md. Running the analysis appends a new timestamped row for the full run.
+
 ## Inputs and results
 
 - [Membership catalogue](https://doi.org/10.1051/0004-6361/202346285) and the [Cavallo](https://doi.org/10.3847/1538-3881/ad07e5) and [Bossini](https://doi.org/10.1051/0004-6361/201834693) parameter extracts are in [data/raw](data/raw). Each TSV header records its exact VizieR query. The two CMD 3.9 model files preserve the PARSEC settings and primary references in their headers. Please cite the original data and model providers when reusing these inputs.
