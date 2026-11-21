@@ -4,12 +4,12 @@ This repository contains the sources for the M67 paper, its five raw inputs and 
 
 ## Reproduce the paper
 
-Use Python 3.11, Bash, and TeX Live with pdfLaTeX, BibTeX and English and Russian language support (the course style loads both). The build was tested with TeX Live 2026. From the repository root:
+Use Python 3.12, Bash, and TeX Live with pdfLaTeX, BibTeX and English and Russian language support (the course style loads both). The build was tested with TeX Live 2026. From the repository root:
 
 ```sh
-python3.11 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-paper.txt
 bash reproduce.sh
 ```
 

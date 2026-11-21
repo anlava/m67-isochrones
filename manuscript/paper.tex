@@ -174,9 +174,9 @@ The analysis is restricted to the main-sequence branch ($\mathrm{label} = 1$) an
 \label{sec:reproducibility}
 
 The repository includes the catalogue extracts, model inputs, analysis code and paper sources. \IfFileExists{../repository-link.tex}{\input{../repository-link.tex}}{The repository link is withheld for review.}
-From the repository root, activate a Python 3.11 environment and run:
+From the repository root, activate a Python 3.12 environment and run:
 \begin{verbatim}
-python -m pip install -r requirements.txt
+pip install -r requirements-paper.txt
 bash reproduce.sh
 \end{verbatim}
 The script rebuilds the two reconstructions, computes the residuals, checks membership IDs against the raw catalogue, and rebuilds Figure~\ref{fig:cmd_comparison} and this PDF. The six rows of Table~\ref{tab:results} can be checked against \path{experiment/results/m67_residuals_inrt_comparison.csv}.
