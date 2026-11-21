@@ -1,0 +1,14 @@
+.venv/
+.env
+.env.*
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.hypothesis/
+results/week6_runs.csv
+manuscript/*.aux
+manuscript/*.log
+manuscript/*.bbl
+manuscript/*.blg
+manuscript/*.out
