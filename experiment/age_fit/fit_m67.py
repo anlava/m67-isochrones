@@ -24,10 +24,11 @@ DMOBS = {"Cavallo": 9.64, "Bossini": 9.726}
 
 # ── Cross-check colours ────────────────────────────────────────
 def crosscheck_colours():
-    """Сверяет BP-RP исходного TSV и selected CSV по GaiaDR3 для 257 звёзд."""
-    errors = []
-
-    # Read TSV
+    """
+    Сверяет полные наборы из 257 уникальных GaiaDR3 и BP-RP между TSV и CSV.
+    Выборка из CSV делается тем же фильтром 11.5 ≤ G < 13.5.
+    """
+    # Read TSV — 257 stars with 11.5 ≤ G < 13.5
     tsv = {}
     with open(DATA_TSV, encoding="utf-8-sig") as f:
         for line in f:
@@ -44,29 +45,49 @@ def crosscheck_colours():
             except ValueError:
                 continue
             if 11.5 <= g < 13.5:
-                tsv[cols[1].strip()] = {"g": g, "bp_rp": bp - rp, "bp": bp, "rp": rp}
+                tsv[cols[1].strip()] = {"g": g, "bp_rp": bp - rp}
 
-    # Read selected CSV
+    # Read CSV — select same filter 11.5 ≤ G < 13.5
     sel = {}
     with open(SEL_CSV) as f:
         for r in csv.DictReader(f):
-            sel[r["GaiaDR3"].strip()] = float(r["BP_RP"])
+            g = float(r["Gmag"].strip())
+            if 11.5 <= g < 13.5:
+                sel[r["GaiaDR3"].strip()] = float(r["BP_RP"])
 
-    common = set(tsv.keys()) & set(sel.keys())
-    for gaia in common:
+    # Same number?
+    if len(tsv) != len(sel):
+        print(f"✗  SIZE MISMATCH: TSV={len(tsv)}, CSV={len(sel)}")
+        return False
+
+    # Same IDs?
+    tsv_ids = set(tsv.keys())
+    sel_ids = set(sel.keys())
+    if tsv_ids != sel_ids:
+        missing = tsv_ids - sel_ids
+        extra = sel_ids - tsv_ids
+        print(f"✗  ID MISMATCH: missing={len(missing)}, extra={len(extra)}")
+        if missing:
+            print(f"    Missing from CSV: {list(missing)[:3]}")
+        if extra:
+            print(f"    Extra in CSV: {list(extra)[:3]}")
+        return False
+
+    # BP-RP values match?
+    errors = []
+    for gaia in tsv:
         t = tsv[gaia]["bp_rp"]
         s = sel[gaia]
         if abs(t - s) > 1e-6:
             errors.append((gaia, t, s))
 
     if errors:
-        print(f"⚠  BP-RP mismatches: {len(errors)}/{len(common)}")
+        print(f"✗  BP-RP mismatches: {len(errors)}/257")
         for g, t, s in errors[:5]:
             print(f"    {g}: TSV={t:.6f} CSV={s:.6f}")
         return False
-    else:
-        print(f"✓  BP-RP cross-check: all {len(common)} stars match")
-        return True
+    print(f"✓  Colour cross-check: 257/257 GaiaDR3 IDs and BP-RP match")
+    return True
 
 # ── Load 257 stars ─────────────────────────────────────────────
 def load_257_stars():
