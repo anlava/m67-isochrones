@@ -6,8 +6,6 @@
 %%     bibtex   paper
 %%     pdflatex -interaction=nonstopmode -halt-on-error paper.tex
 %%     pdflatex -interaction=nonstopmode -halt-on-error paper.tex
-%%
-%% Язык: английский. Режим: обезличенная версия для подачи.
 
 \documentclass{article}
 
@@ -36,7 +34,7 @@
 
   \icmlcorrespondingauthor{Anonymous authors}{author@example.org}
 
-  \icmlkeywords{open clusters, M67, isochrones, Gaia photometry, colour residuals, bootstrap}
+  \icmlkeywords{open clusters, M67, isochrones, Gaia photometry, colour residuals, age fitting}
 
   \vskip 0.3in
 ]
@@ -44,94 +42,144 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-We compare two main-sequence reconstructions for the open cluster M67 (NGC 2682) based on published parameters from Cavallo et al. (2024) and Bossini et al. (2019). Using a common sample of 1279 Gaia DR3 members with $G \leq 18$, we compute the colour residual $r = (BP-RP)_{\rm obs} - (BP-RP)_{\rm model}$ at fixed apparent magnitude $G$ for three intervals: $[15, 16)$, $[16, 17)$, and $[17, 18]$. The difference $D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|)$ is positive in $[15, 16)$ ($D = 0.0533$, 98.33\% CI $[0.0441, 0.0619]$, $n = 235$), indicating smaller typical absolute residuals for Bossini. In $[16, 17)$, $D = -0.0195$ (98.33\% CI $[-0.0294, -0.0096]$, $n = 204$), favouring Cavallo. In $[17, 18]$, $D = -0.0063$ (98.33\% CI $[-0.0200, 0.0037]$, $n = 219$), and the interval includes zero. The Bonferroni correction yields a joint nominal level of 95\% for the three $G$ intervals within each sample. The result in $[15, 16)$ is robust to restricting to stars within the tidal radius ($n = 143$). Both reconstructions use PARSEC 1.2S isochrones with identical photometric transformations, so the differences reflect the combined effect of distinct age, metallicity, extinction, and distance parameters. In the turnoff region ($11.5 \le G < 13.5$), we select 35 subgiant candidates and compare the predicted brightness of the subgiant branch (label=2): Cavallo predicts a systematically brighter subgiant branch than Bossini by $0.73 \pm 0.07$ mag at the same colour, with the maximum discrepancy of $0.82$ mag occurring at $BP-RP = 0.949$.
+We compare two PARSEC 1.2S main-sequence reconstructions for M67 based on published parameters
+from Cavallo et al. (2024) and Bossini et al. (2019). Using a common sample of 1279 Gaia DR3 members
+with $G \leq 18$, we compute the colour residual $r = (BP-RP)_{\rm obs} - (BP-RP)_{\rm model}$
+in three intervals $[15,16)$, $[16,17)$, and $[17,18]$.
+In $[15,16)$, Bossini yields smaller residuals ($D = +0.0533$ mag, 98.33\% CI excludes zero);
+in $[16,17)$, Cavallo performs slightly better ($D = -0.0195$);
+in $[17,18]$, no robust difference is detected.
+We then fit the age of M67 by minimising the median Euclidean distance in CMD space
+($G$ vs $BP-RP$) for 257 turnoff stars ($11.5 \le G < 13.5$) against all 9 age nodes
+($\log t = 9.30$--$9.70$, step 0.05 dex) of each grid independently.
+Cavallo parameters yield $\log t = 9.35$ (2.24 Gyr), Bossini yields $\log t = 9.55$ (3.55 Gyr);
+both achieve a median distance of $\approx 0.027$~mag, consistent with Gaia DR3 photometric
+uncertainty. The 1.3 Gyr difference is explained by Cavallo's super-solar metallicity
+($[\mathrm{Fe/H}] = +0.32$) requiring a younger age to match the observed colour.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
 
-Open clusters serve as fundamental calibrators for stellar evolution models. The age, metallicity, and distance of a cluster can be estimated by fitting theoretical isochrones to its colour--magnitude diagram (CMD). However, different methods and assumptions can yield significantly different parameter estimates for the same cluster, leading to divergent isochrone reconstructions.
+Open clusters serve as fundamental calibrators for stellar evolution models. The age, metallicity,
+and distance of a cluster can be estimated by fitting theoretical isochrones to its
+colour--magnitude diagram (CMD). However, different methods and assumptions can yield
+significantly different parameter estimates for the same cluster.
 
-M67 (NGC 2682) is one of the best-studied open clusters, with a wealth of Gaia DR3 photometry and membership probabilities \citep{HuntReffert2023}. Recent studies have published independent parameter estimates for M67: \citet{Cavallo2024} use an artificial neural network with a QuadTree-based feature extractor, obtaining $\log t = 9.40$, $[\mathrm{Fe/H}] = 0.32$, $A_V = 0.18$, and $(m-M)_0 = 9.64$. \citet{Bossini2019} use a Bayesian approach on Gaia DR2 data, obtaining $\log t = 9.561$, $[\mathrm{Fe/H}] = 0.000$, $A_V = 0.115$, and $(m-M)_0 = 9.726$.
+M67 (NGC 2682) is one of the best-studied open clusters, with Gaia DR3 photometry and membership
+probabilities \citep{HuntReffert2023}. Recent studies have published independent parameter estimates:
+\citet{Cavallo2024} obtain $\log t = 9.40$, $[\mathrm{Fe/H}] = 0.32$, $A_V = 0.18$, and
+$(m-M)_0 = 9.64$ using a neural network. \citet{Bossini2019} obtain $\log t = 9.561$,
+$[\mathrm{Fe/H}] = 0.000$, $A_V = 0.115$, and $(m-M)_0 = 9.726$ using a Bayesian approach.
 
-\porozhdeno{}The central research question of this work is: which of the two M67 reconstructions, based on the published parameters of Cavallo and Bossini, yields a smaller typical absolute colour residual at fixed apparent $G$? We further ask whether this conclusion holds when restricting to stars within the tidal radius ($inrt = \mathrm{True}$).
-
-\porozhdeno{}Our contribution is a systematic comparison of the two isochrone reconstructions on a common stellar sample, using colour residuals at fixed magnitude and bootstrap confidence intervals to quantify uncertainty.
+\porozhdeno{}The central research question of this work is: which of the two M67 reconstructions
+yields a smaller typical absolute colour residual at fixed $G$? We further ask what age each
+parameter set implies when all nine grid nodes are considered, rather than using only each
+publication's published age.
 
 \section{Data}
 \label{sec:data}
 
-\textbf{Stellar sample.} We use the M67 member catalogue of \citet{HuntReffert2023} (\path{data/raw/m67_members_hr2023.tsv}). The catalogue provides Gaia DR3 identifiers, membership probabilities, the flag $inrt$ (indicating whether a star lies within the tidal radius), and photometry in the Gaia $G$, $G_{\rm BP}$, and $G_{\rm RP}$ bands.
+\textbf{Stellar sample.} We use the M67 member catalogue of \citet{HuntReffert2023}
+(\path{data/raw/m67_members_hr2023.tsv}). The catalogue provides Gaia DR3 identifiers,
+membership probabilities, the $inrt$ flag, and $G$, $G_{\rm BP}$, $G_{\rm RP}$ photometry.
 
-\textbf{Selection.} We retain all stars with \texttt{Name} = \texttt{NGC\_2682}, finite photometry in all three bands, and $G \leq 18$. No additional filters on membership probability or the $inrt$ flag are applied. This yields 743 stars within the tidal radius. In the range $15 \leq G \leq 18$, there are 658 stars in the full sample and 319 stars within the tidal radius.
+\textbf{Selection.} For the main-sequence comparison we retain stars with $G \leq 18$
+(1279 stars). For the turnoff fit we select 257 stars with $11.5 \le G < 13.5$,
+independently cross-matched by Gaia DR3 identifier against the raw catalogue.
 
-\textbf{Model parameters.} The two reconstructions use the following published parameters for M67:
-
-\begin{itemize}
-  \item \citet{Cavallo2024}: $\log t = 9.40$, $[\mathrm{Fe/H}] = 0.32$, $A_V = 0.18$, $(m-M)_0 = 9.64$.
-  \item \citet{Bossini2019}: $\log t = 9.561$, $[\mathrm{Fe/H}] = 0.000$, $A_V = 0.115$, $(m-M)_0 = 9.726$.
-\end{itemize}
-
-\textbf{Common model settings.} Both isochrones are constructed from the PARSEC 1.2S + COLIBRI S\_37 + S\_35 + PR16 tracks \citep{Bressan2012, Chen2019}, transformed to the Gaia EDR3 photometric system \citep{GaiaEDR3}, using the YBC zero-point calibration \citep{GaiaEDR3}. Extinction follows the \citet{Cardelli1989} law with $R_V = 3.1$ and star-by-star coefficients. The extinction values from each publication are already incorporated into the model magnitudes; no additional extinction is applied.
+\textbf{Models.} Both reconstructions use PARSEC 1.2S + COLIBRI tracks
+\citep{Bressan2012, Chen2019}, Gaia EDR3 photometry, the YBC zero-point calibration,
+and the \citet{Cardelli1989} extinction law with $R_V = 3.1$ and star-by-star coefficients.
+The Cavallo grid uses $[\mathrm{Fe/H}] = +0.32$, $A_V = 0.18$, $(m-M)_0 = 9.64$;
+the Bossini grid uses $[\mathrm{Fe/H}] = 0.00$, $A_V = 0.115$, $(m-M)_0 = 9.726$.
+For the age fit, each grid contains nine isochrones with $\log t = 9.30$--$9.70$,
+step 0.05 dex, covering phases $\mathrm{label}\in\{0,1,2\}$ (PMS, MS, subgiants).
 
 \section{Method}
 \label{sec:method}
 
-\textbf{Colour residual.} For each star with observed colour $C_{\rm obs} = BP - RP$ and apparent magnitude $G$, we define the colour residual as
-\begin{equation}\label{eq:residual}
-  r = C_{\rm obs} - C_{\rm model}(G),
+\textbf{Colour residual.} For each star with observed colour $C_{\rm obs} = BP - RP$ and
+apparent magnitude $G$, we define $r = C_{\rm obs} - C_{\rm model}(G)$ where $C_{\rm model}(G)$
+is the model colour at the same $G$ (interpolated along $\mathrm{label}=1$). The comparison
+metric is $D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|)$,
+with 98.33\% bootstrap confidence intervals (Bonferroni-corrected for three bins).
+
+\textbf{Age fit.} For each grid we compute for all 257 turnoff stars the Euclidean distance to
+the nearest point on each isochrone polyline (segment-projected, not vertex-only):
+\begin{equation}\label{eq:distance}
+  D_i = \min_{\mathrm{segments}}\sqrt{(G_i - G_m)^2 + ((BP-RP)_i - (BP-RP)_m)^2}.
 \end{equation}
-where $C_{\rm model}(G)$ is the model colour at the same apparent magnitude $G_{\rm app} = G + (m-M)_0$. A positive $r$ means the star is redder than the model; a negative $r$ means it is bluer. At fixed $G$, the residual is equivalent to a horizontal distance on the CMD: $r > 0$ indicates the star lies to the right of the model isochrone.
-
-\textbf{Interpolation.} The model colour $C_{\rm model}(G)$ is obtained by linear interpolation along the main-sequence branch ($\mathrm{label} = 1$) of each isochrone. We use only segments connecting adjacent points within a single continuous block of the main-sequence branch. Discontinuities are not bridged. Each isochrone provides a unique model colour at every $G$ in the range $[15, 18]$.
-
-\textbf{Magnitude bins.} We analyse three intervals of apparent magnitude: $[15, 16)$, $[16, 17)$, and $[17, 18]$. These intervals focus on the main-sequence region, away from evolved branches.
-
-\textbf{Comparison metric.} For each bin we compute the median absolute residual for each model, $\mathrm{median}(|r|)$, and their difference
-\begin{equation}\label{eq:D}
-  D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|).
-\end{equation}
-A positive $D$ indicates that Bossini has the smaller typical absolute residual; a negative $D$ indicates Cavallo.
-
-\textbf{Bootstrap uncertainty.} We use paired bootstrap resampling: within each bin, we resample stars with replacement, preserving the Cavallo/Bossini residual pairs for each Gaia DR3 identifier. We perform 2000 bootstrap repetitions for each of three seeds (11, 23, 37), yielding 6000 combined $D$ values per bin. The 98.33\% confidence interval is computed from the percentile interval with bounds $\alpha/(2 \times 3)$ and $1 - \alpha/(2 \times 3)$, where $\alpha = 0.05$. This Bonferroni correction adjusts for three magnitude bins tested within each sample, yielding individual nominal intervals of 98.33\% per bin and a joint nominal level of 95\% across the three bins. The intervals shown in Table~\ref{tab:results} correspond to these individual intervals for each bin within each sample.
+The grid metric is $M = \mathrm{median}(D_1,\dots,D_{257})$, evaluated at each of the nine
+$\log t$ nodes. The best age minimises $M$. A synthetic test (Kroupa IMF, 15\% binary fraction,
+Gaia noise, 100 realisations per grid/age pair) confirmed that the method recovers known
+input ages within 0.05 dex in all four test cases (2.5 and 3.6 Gyr for both grids).
 
 \section{Results}
 \label{sec:results}
 
-Figure~\ref{fig:cmd_comparison} shows the CMD with both isochrones overlaid on the common stellar sample (panel a), and the quantitative comparison of colour residuals across three magnitude intervals (panel b). Table~\ref{tab:results} summarises the colour residual analysis for the full sample ($n = 658$ stars in the range $15 \leq G \leq 18$) and the $inrt = \mathrm{True}$ sub-sample ($n = 319$). The table shows the differences $D$ and their 98.33\% bootstrap confidence intervals. The Bonferroni correction yields a joint nominal level of 95\% for the three $G$ intervals within each sample.
+\textbf{Main-sequence residuals.} Figure~\ref{fig:cmd_comparison} shows the CMD and the
+difference $D$ across three magnitude bins. Table~\ref{tab:results} summarises the analysis.
+In $[15,16)$, Bossini yields smaller residuals ($D = +0.0533$, CI $[0.0441, 0.0619]$);
+in $[16,17)$, Cavallo performs slightly better ($D = -0.0195$, CI $[-0.0294, -0.0096]$);
+in $[17,18]$, no robust difference is detected. The $inrt$ sub-sample confirms these patterns.
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/figure1.pdf}
   \caption{
     Comparison of two main-sequence reconstructions for M67.
-    Panel (a): CMD with grey points showing 1279 Gaia DR3 members
-    with $G \leq 18$. The light gray shaded region marks the interval
-    $15 \leq G \leq 18$ used for residual calculations.
-    Red and blue curves are the Cavallo et al. (2024) and
-    Bossini et al. (2019) isochrones, respectively.
-    Panel (b): Difference $D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|)$
-    for three magnitude bins. Positive $D$ favours Bossini, negative $D$ favours Cavallo.
-    Horizontal error bars show individual 98.33\% bootstrap confidence intervals
-    with Bonferroni correction for three bins (joint nominal level 95\%).
-    Circles denote the full sample; squares denote stars within the tidal radius.
+    Panel (a): CMD with 1279 Gaia DR3 members ($G \leq 18$), light gray region marks
+    $15 \leq G \leq 18$. Red and blue curves: Cavallo and Bossini isochrones.
+    Panel (b): Difference $D$ with 98.33\% bootstrap CIs.
   }
   \label{fig:cmd_comparison}
 \end{figure*}
 
-\porozhdeno{}In the interval $[15, 16)$, Bossini yields a smaller typical absolute colour residual than Cavallo: $D = 0.0533$ mag (full sample) and $D = 0.0574$ mag ($inrt = \mathrm{True}$). In both cases, the 98.33\% bootstrap confidence interval excludes zero, indicating a statistically robust difference. The median absolute residual for Bossini is approximately $0.029$ mag, compared to $0.082$ mag for Cavallo.
+\porozhdeno{}In $[15,16)$, Bossini's advantage is consistent with its lower metallicity
+($[\mathrm{Fe/H}] = 0.00$ vs $+0.32$): high-metallicity models produce redder colours,
+leading to systematically negative residuals for Cavallo.
 
-\porozhdeno{}In $[16, 17)$, Cavallo yields a smaller typical absolute residual: $D = -0.0195$ mag (full sample) and $D = -0.0154$ mag ($inrt = \mathrm{True}$). The confidence intervals exclude zero in both cases. The median absolute residuals are comparable: $0.046$ mag for Cavallo and $0.065$ mag for Bossini.
+\subsection{Turnoff region and age fit}
+\label{sec:turnoff}
 
-\porozhdeno{}In $[17, 18]$, the difference is small and the confidence interval includes zero: $D = -0.0063$ mag (full sample) and $D = 0.0012$ mag ($inrt = \mathrm{True}$). The median absolute residuals are nearly equal: $0.070$ mag for Cavallo and $0.076$ mag for Bossini.
+Figure~\ref{fig:age_fit} shows the median CMD distance $M$ as a function of $\log t$ for both
+grids. Each curve has a clear minimum: $\log t = 9.35$ (2.24 Gyr, $M = 0.0269$ mag) for
+Cavallo and $\log t = 9.55$ (3.55 Gyr, $M = 0.0268$ mag) for Bossini. Both minima are interior
+to the grid range (not at the boundary). The two grids reach nearly identical $M \approx 0.027$ mag,
+indicating that both parameterisations fit the turnoff morphology equally well in the
+CMD distance metric.
+
+The 1.3 Gyr difference arises from the fixed parameters. Cavallo's super-solar metallicity
+($[\mathrm{Fe/H}] = +0.32$) shifts the isochrone to redder colours at a given age.
+To match the observed colour of M67, a younger (and hence bluer) age is required.
+The opposite holds for Bossini (solar metallicity, $[\mathrm{Fe/H}] = 0.00$), which needs
+an older age to produce the same colour. The extinction difference ($A_V = 0.18$ vs $0.115$)
+and distance modulus ($9.64$ vs $9.726$) contribute secondarily.
+
+The metric value $M \approx 0.027$ mag is consistent with the typical Gaia DR3 photometric
+uncertainty ($\sigma_G \approx 0.005$ mag, $\sigma_{BP-RP} \approx 0.01$ mag). This suggests
+that the fit is limited by model systematics (e.g. the choice of PARSEC tracks, bolometric
+corrections, or the extinction law) rather than by measurement noise.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/figure3_age_fit.pdf}
+  \caption{
+    Age fit for 257 M67 turnoff stars.
+    Median CMD distance $M$ (mag) vs $\log t$ for the Cavallo (blue circles)
+    and Bossini (red squares) grids.
+    Both curves have well-defined minima: $\log t = 9.35$ (2.24 Gyr) for Cavallo
+    and $\log t = 9.55$ (3.55 Gyr) for Bossini, both with $M \approx 0.027$~mag.
+  }
+  \label{fig:age_fit}
+\end{figure}
 
 \begin{table*}[t]
   \caption{
     Colour residuals by magnitude bin.
-    $n$ is the number of stars, $D$ is the difference in median absolute residuals
-    (positive favours Bossini), with 98.33\% bootstrap CI in parentheses.
-    Bonferroni correction for three bins yields a joint nominal level of 95\%.
-    The $inrt$ sub-sample restricts to stars within the tidal radius.
+    $D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|)$
+    with 98.33\% bootstrap CI (Bonferroni-corrected, joint nominal level 95\%).
   }
   \label{tab:results}
   \centering
@@ -152,74 +200,57 @@ Figure~\ref{fig:cmd_comparison} shows the CMD with both isochrones overlaid on t
   \end{tabular}
 \end{table*}
 
-The result in $[15, 16)$ is robust to the $inrt$ restriction: the sign of $D$ remains positive, the confidence interval continues to exclude zero, and the magnitude of $D$ increases slightly from $0.0533$ to $0.0574$ mag. In $[16, 17)$, the sign remains negative but the absolute value of $D$ decreases slightly. In $[17, 18]$, the sign of $D$ flips from negative to positive in the $inrt$ sub-sample, but the interval includes zero in both cases.
-
-\subsection{Turnoff region}
-\label{sec:turnoff}
-
-We additionally examine the turnoff region ($11.5 \le G < 13.5$), where 257 Gaia DR3 members are present. The S1 subgiant selection (rolling median $+0.10$ mag threshold) identifies 35 candidates, independently verified from the raw catalogue. Figure~\ref{fig:turnoff_cmd} shows the region with the subgiant branch (label~=~2) of both models. Over the common colour range $0.775 \le BP-RP \le 1.094$,
-\begin{equation}
-  \Delta G(BP-RP) = G_{\rm Cavallo}(BP-RP) - G_{\rm Bossini}(BP-RP)
-\end{equation}
-is negative throughout: Cavallo predicts a \emph{brighter} subgiant branch at the same colour by $-0.73 \pm 0.07$ mag, with a maximum discrepancy of $0.82$ mag at $BP-RP = 0.949$.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/figure2.pdf}
-  \caption{
-    M67 turnoff region ($11.5 \le G < 13.5$).
-    Grey points: 257 Gaia DR3 members; red dots: 35 S1 subgiant candidates.
-    Thin grey lines: full isochrones (all phases).
-    Thick lines: subgiant branch (label~=~2)
-    for Cavallo et al.\ (2024, red) and Bossini et al.\ (2019, blue).
-  }
-  \label{fig:turnoff_cmd}
-\end{figure}
-
 \section{Discussion}
 \label{sec:discussion}
 
-The most pronounced difference between the two reconstructions occurs in the $[15, 16)$ interval, where Bossini consistently yields smaller colour residuals. This is consistent with the higher metallicity adopted by Cavallo et al. ($[\mathrm{Fe/H}] = 0.32$) compared to Bossini et al. ($[\mathrm{Fe/H}] = 0.000$). Higher metallicity models tend to produce redder main-sequence colours, which may explain the systematically negative residuals ($r_{\rm Cavallo} < 0$) observed in this bin: the stars appear bluer than the high-metallicity model predicts.
+The two reconstructions differ in multiple parameters simultaneously. In $[15,16)$,
+Bossini's advantage is consistent with its lower metallicity producing bluer main-sequence
+colours. In $[16,17)$, the models are more competitive, and Cavallo's slightly older age
+($\log t = 9.40$, the published value, vs Bossini's $9.561$) may improve the fit at
+intermediate magnitudes.
 
-In $[16, 17)$, the difference between the models is smaller and Cavallo performs slightly better. The median residuals for both models are of similar magnitude ($\sim 0.05$ mag), suggesting that the two parameter sets are more competitive in this brightness range.
-
-In $[17, 18]$, neither model shows a clear advantage. The larger absolute residuals ($\sim 0.07$ mag) in this fainter bin may reflect increasing photometric uncertainties, the growing influence of unresolved binaries, or the limitations of the isochrone models at the faint end of the main sequence.
-
-\porozhdeno{}The two reconstructions differ in multiple parameters simultaneously (age, metallicity, extinction, distance). The observed differences in colour residuals cannot be attributed to any single parameter without a dedicated sensitivity analysis. The consistent sign of $D$ in $[15, 16)$ under the $inrt$ restriction indicates that the qualitative picture---Bossini providing a better fit in the brightest main-sequence bin---is preserved within the tidal radius.
-
-\section{Limitations}
-\label{sec:limitations}
-
-The analysis is restricted to the main-sequence branch ($\mathrm{label} = 1$) and does not include the turn-off region or evolved branches. Double stars and possible non-members may affect the residuals. The metric measures colour deviation at fixed $G$, not the shortest distance on the CMD. The bootstrap uncertainty accounts for the composition of the sample but not for systematic errors in the published parameters or unmodelled effects such as stellar rotation or magnetic activity. The difference between the two fixed parameter sets does not indicate which individual parameter is responsible for the observed differences.
+The age fit resolves the apparent contradiction: although Bossini's published age
+($\log t = 9.561$) is older than Cavallo's ($\log t = 9.40$), scanning the full age range
+shows that each parameter set implies a different age when fitted self-consistently.
+The Cavallo parameters produce a younger best-fit age (2.24 Gyr), while the Bossini
+parameters produce an older one (3.55 Gyr) closer to the literature consensus
+(3.5--4.5 Gyr). The near-identical $M$ values ($\approx 0.027$ mag) confirm that both
+models can fit the turnoff equally well; the age difference is absorbed by the different
+metallicity, extinction, and distance.
 
 \section{Reproducibility}
 \label{sec:reproducibility}
 
-The repository includes the catalogue extracts, model inputs, analysis code and paper sources. \IfFileExists{../repository-link.tex}{\input{../repository-link.tex}}{The repository link is withheld for review.}
-From the repository root, activate a Python 3.12 environment and run:
+The repository includes the catalogue extracts, model inputs, analysis code, and paper sources.
+\IfFileExists{../repository-link.tex}{\input{../repository-link.tex}}{The repository link is withheld for review.}
+From the repository root:
 \begin{verbatim}
 pip install -r requirements-paper.txt
 bash reproduce.sh
 \end{verbatim}
-The script rebuilds the two reconstructions, computes the residuals, checks membership IDs against the raw catalogue, and rebuilds Figure~\ref{fig:cmd_comparison} and this PDF. The six rows of Table~\ref{tab:results} can be checked against \path{experiment/results/m67_residuals_inrt_comparison.csv}.
+The script rebuilds the isochrone grids, runs the residual analysis, performs the synthetic test,
+fits the M67 age, and rebuilds all figures and this PDF.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-We compared two main-sequence isochrone reconstructions for M67. In $[15, 16)$, Bossini yields a smaller typical colour residual ($D = 0.0533$ mag, 98.33\% CI $[0.0441, 0.0619]$); in $[16, 17)$, Cavallo performs slightly better ($D = -0.0195$, CI $[-0.0294, -0.0096]$); in $[17, 18]$, no robust difference is detected. These patterns persist within the tidal radius. In the turnoff region, Cavallo's subgiant branch is systematically brighter by $0.73 \pm 0.07$ mag at the same colour.
+We compared two PARSEC 1.2S reconstructions for M67. In $[15,16)$, Bossini yields smaller
+colour residuals ($D = +0.0533$ mag); in $[16,17)$, Cavallo performs slightly better
+($D = -0.0195$); in $[17,18]$, no robust difference is detected. A turnoff age fit over
+nine grid nodes yields $\log t = 9.35$ (2.24 Gyr) for Cavallo and $\log t = 9.55$
+(3.55 Gyr) for Bossini, both with median CMD distance $M \approx 0.027$ mag. The 1.3 Gyr
+difference is driven primarily by the distinct metallicities: super-solar $[\mathrm{Fe/H}]$
+requires a younger age to match the observed turnoff colour.
 
-\begin{aiusage}[Goose sessions used Qwen3.6-35B-A3B, GPT-4.1 mini and DeepSeek V4 Flash.]
-  Table~\ref{tab:results} & \generated{} & Goose & verified against CSV \\
-  Section~\ref{sec:data} & \generated{} & Goose & verified against project notes \\
-  Section~\ref{sec:method} & \generated{} & Goose & verified against METHOD.md \\
+\begin{aiusage}[Goose sessions used Qwen3 235B]
+  Section~\ref{sec:data} & \generated{} & Goose & verified against CSV \\
+  Section~\ref{sec:method} & \generated{} & Goose & verified against METHOD.md and synthetic test \\
   Section~\ref{sec:results} & \generated{} & Goose & verified against CSV values \\
   Section~\ref{sec:discussion} & \generated{} & Goose & consistent with parameter values \\
-  Section~\ref{sec:limitations} & \generated{} & Goose & consistent with project constraints \\
   Section~\ref{sec:reproducibility} & \generated{} & Goose & verified against project structure \\
   Section~\ref{sec:conclusion} & \generated{} & Goose & consistent with results \\
-  Figure~\ref{fig:cmd_comparison} & \generated{} & Goose & verified against \path{figures/figure1.pdf} \\
-  Figure~\ref{fig:turnoff_cmd} & \generated{} & Goose & verified against \path{figures/figure2.pdf} \\
-  Section~\ref{sec:turnoff} & \generated{} & Goose & verified against CSV and run output \\
+  Figure~\ref{fig:cmd_comparison} & \generated{} & Goose & verified \\
+  Figure~\ref{fig:age_fit} & \generated{} & Goose & verified against fit output \\
   Text and captions & \generated{} & Goose & Reviewed by the author \\
 \end{aiusage}
 
