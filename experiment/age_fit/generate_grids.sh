@@ -14,8 +14,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-OUTDIR="$ROOT/data/raw"
-RESDIR="$ROOT/results"
+OUTDIR="$ROOT/experiment/age_fit"
+RESDIR="$ROOT/experiment/age_fit"
 CMD_URL="https://stev.oapd.inaf.it/cgi-bin/cmd_3.9"
 TMP_BASE="https://stev.oapd.inaf.it"
 
@@ -121,50 +121,64 @@ for GRID_NAME in "${!GRIDS[@]}"; do
   done
 
   # Сохраняем объединённый .dat
-  DAT_OUT="${OUTDIR}/m67_parsec12s_${GRID_NAME}.dat"
+  DAT_OUT="${OUTDIR}/grid_${GRID_NAME}.dat"
   mv "$TMP_DAT" "$DAT_OUT"
   echo "  → $DAT_OUT (всего $DATA_COUNT строк данных)"
 
-  # Конвертируем в CSV (G_app = Gmag + dMod, BP_RP = G_BP - G_RP)
-  CSV_OUT="${RESDIR}/m67_isochrone_${GRID_NAME}.csv"
+  # Конвертируем в CSV (чтение колонок по заголовку)
+  CSV_OUT="${RESDIR}/grid_${GRID_NAME}.csv"
   python3 -c "
-import csv, sys
+import csv
 with open('$DAT_OUT') as f:
-    lines = [l for l in f if not l.startswith('#') and l.strip()]
+    lines = f.readlines()
+
+# Парсим заголовок колонок
+header_line = None
+for line in lines:
+    if line.startswith('#') and 'Zini' in line and 'Gmag' in line:
+        header_line = line.lstrip('#').strip()
+        break
+if header_line is None:
+    print('ОШИБКА: заголовок колонок не найден', file=sys.stderr)
+    exit(1)
+
+col_names = header_line.split()
+required = ['Gmag','G_BPmag','G_RPmag','Mini','logAge','MH','label']
+indices = {name: col_names.index(name) for name in required}
 
 # Определяем dMod для сетки
 dMod = 9.64 if '$GRID_NAME' == 'cavallo2024_av018' else 9.726
 
+data_lines = [l for l in lines if not l.startswith('#') and l.strip()]
 with open('$CSV_OUT', 'w', newline='') as out:
-    w = csv.writer(out)
-    w.writerow(['Gmag','G_BPmag','G_RPmag','G_app','BP_RP','Mini','logAge','MH','label'])
-    for line in lines:
+    w = csv.DictWriter(out, fieldnames=['Gmag','G_BPmag','G_RPmag','G_app','BP_RP','Mini','logAge','MH','label'])
+    w.writeheader()
+    for line in data_lines:
         cols = line.split()
-        if len(cols) < 15:
+        if len(cols) != len(col_names):
             continue
         try:
-            zini = float(cols[0])
-            mh = float(cols[1])
-            logage = float(cols[2])
-            mini = float(cols[3])
-            label = int(cols[9])
-            gmag = float(cols[30])
-            g_bpmag = float(cols[31])
-            g_rpmag = float(cols[32])
+            gmag = float(cols[indices['Gmag']])
+            g_bp = float(cols[indices['G_BPmag']])
+            g_rp = float(cols[indices['G_RPmag']])
         except (ValueError, IndexError):
             continue
         g_app = gmag + dMod
-        bp_rp = g_bpmag - g_rpmag
-        w.writerow([f'{gmag:.6f}', f'{g_bpmag:.6f}', f'{g_rpmag:.6f}',
-                     f'{g_app:.6f}', f'{bp_rp:.6f}',
-                     f'{mini:.10f}', f'{logage:.5f}', f'{mh:.5f}', label])
-  "
-  echo "  → $CSV_OUT"
+        bp_rp = g_bp - g_rp
+        w.writerow({
+            'Gmag': f'{gmag:.6f}', 'G_BPmag': f'{g_bp:.6f}', 'G_RPmag': f'{g_rp:.6f}',
+            'G_app': f'{g_app:.6f}', 'BP_RP': f'{bp_rp:.6f}',
+            'Mini': cols[indices['Mini']], 'logAge': cols[indices['logAge']],
+            'MH': cols[indices['MH']], 'label': cols[indices['label']],
+        })
+print(f'→ $CSV_OUT')
+" || exit 1
+  echo ""
   echo ""
 done
 
 echo "Готово. Сетки сохранены в:"
-ls -lh "$OUTDIR"/m67_parsec12s_*.dat
+ls -lh "$OUTDIR"/grid_*.dat
 echo ""
 echo "CSV:"
-ls -lh "$RESDIR"/m67_isochrone_*.csv
+ls -lh "$RESDIR"/grid_*.csv
