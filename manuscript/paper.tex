@@ -222,13 +222,9 @@ The repository includes the catalogue extracts, model inputs, analysis code, and
 From the repository root, to reproduce the age fit and Figure~\ref{fig:age_fit}:
 \begin{verbatim}
 python3 experiment/age_fit/fit_m67.py
-/usr/local/bin/python3.9 -c "
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import csv
-# (plotting code — see experiment/age_fit/fit_m67.py)
-"
+python3 experiment/age_fit/plot_age_fit.py   # requires matplotlib
+cp experiment/age_fit/m67_cmd_fit.png \
+   manuscript/figures/figure3_age_fit.png
 \end{verbatim}
 The synthetic test can be rerun with:
 \begin{verbatim}

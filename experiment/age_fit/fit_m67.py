@@ -53,7 +53,11 @@ def crosscheck_colours():
         for r in csv.DictReader(f):
             g = float(r["Gmag"].strip())
             if 11.5 <= g < 13.5:
-                sel[r["GaiaDR3"].strip()] = float(r["BP_RP"])
+                gaia = r["GaiaDR3"].strip()
+                if gaia in sel:
+                    print(f"    DUPLICATE GaiaDR3 in CSV: {gaia}")
+                    return False
+                sel[gaia] = float(r["BP_RP"])
 
     # Same number?
     if len(tsv) != len(sel):
