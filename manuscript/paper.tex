@@ -221,10 +221,10 @@ by the different metallicity, extinction, and distance values.
 
 The repository includes the catalogue extracts, model inputs, analysis code, and paper sources.
 \IfFileExists{../repository-link.tex}{\input{../repository-link.tex}}{The repository link is withheld for review.}
-From the repository root, to reproduce the age fit and Figure~\ref{fig:age_fit}:
+Plotting requires Matplotlib. From the repository root, to reproduce the age fit and Figure~\ref{fig:age_fit}:
 \begin{verbatim}
 python3 experiment/age_fit/fit_m67.py
-python3 experiment/age_fit/plot_age_fit.py   # requires matplotlib
+python3 experiment/age_fit/plot_age_fit.py
 cp experiment/age_fit/m67_cmd_fit.png \
    manuscript/figures/figure3_age_fit.png
 \end{verbatim}
@@ -233,6 +233,7 @@ The synthetic test can be rerun with:
 python3 experiment/age_fit/synthetic_test.py
 \end{verbatim}
 All checks:
+\small
 \begin{verbatim}
 python3 checks/check_comparison.py
 python3 experiment/age_fit/verify_components.py
@@ -241,12 +242,16 @@ python3 experiment/age_fit/verify_components.py
 \section{Conclusion}
 \label{sec:conclusion}
 
-We compared two PARSEC 1.2S reconstructions for M67. In $[15,16)$, Bossini yields smaller
-colour residuals ($D = +0.0533$ mag); in $[16,17)$, Cavallo performs slightly better
-($D = -0.0195$); in $[17,18]$, no robust difference is detected. A turnoff age fit over
-nine grid nodes yields $\log t = 9.35$ (2.24 Gyr) for Cavallo and $\log t = 9.55$
-(3.55 Gyr) for Bossini, both with median CMD distance $M \approx 0.027$ mag. The 1.3 Gyr
-difference arises from the different fixed parameter sets used by each publication.
+We compared two PARSEC 1.2S reconstructions for M67.
+In $[15,16)$, Bossini yields smaller colour residuals
+($D = +0.0533$~mag); in $[16,17)$, Cavallo performs
+slightly better ($D = -0.0195$); in $[17,18]$, no robust
+difference is detected.
+A turnoff age fit over nine grid nodes yields $\log t = 9.35$
+(2.24~Gyr) for Cavallo and $\log t = 9.55$ (3.55~Gyr) for
+Bossini, both with median CMD distance $M \approx 0.027$~mag.
+The 1.3~Gyr difference arises from the different fixed
+parameter sets used by each publication.
 
 \begin{aiusage}[Goose sessions used Qwen3.6-35B-A3B, GPT-4.1 mini, DeepSeek V4 Flash, and Nemotron 3 Ultra.]
   Section~\ref{sec:data} & \generated{} & Goose & verified against CSV \\
