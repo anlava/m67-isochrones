@@ -70,19 +70,28 @@ def read_candidates_ids(path):
 # ─────────────────────────────────────────────
 # 2. Interpolation: colour → G (inverse of usual)
 # ─────────────────────────────────────────────
-def make_given_colour_interpolator(points):
-    """Строит функцию G(BP-RP) по label=2 точкам (BP-RP монотонно растёт).
+def make_given_colour_interpolator(points, name):
+    """Строит функцию G(BP-RP) по label=2 точкам.
 
-    Возвращает (fun, bp_rp_min, bp_rp_max) или None если не монотонно.
+    Проверяет монотонность цвета в ИСХОДНОМ порядке точек (как в файле).
+    Затем сортирует для интерполяции. Возвращает (fun, bp_rp_min, bp_rp_max)
+    или None если цвет не монотонен.
     """
-    # Сортируем по BP_RP (должен быть уже монотонным, но на всякий случай)
+    # Проверка монотонности цвета в исходном порядке
+    colours_orig = np.array([c for _, c in points])
+    diffs = np.diff(colours_orig)
+    if not np.all(diffs >= 0):
+        non_mono = np.where(diffs < 0)[0]
+        print(f"  {name}: BP-RP НЕ монотонен в исходном порядке! "
+              f"Нарушение на индексах {non_mono.tolist()} "
+              f"(BP-RP: {colours_orig[non_mono[0]]:.4f} → {colours_orig[non_mono[0]+1]:.4f})")
+        return None
+    print(f"  {name}: BP-RP монотонен в исходном порядке (все {len(points)} точек)")
+
+    # Сортируем по BP_RP для интерполяции
     sorted_pts = sorted(points, key=lambda x: x[1])
     colours = np.array([c for _, c in sorted_pts])
     mags = np.array([g for g, _ in sorted_pts])
-
-    # Проверка монотонности
-    if not np.all(np.diff(colours) > -1e-12):
-        return None
 
     def interp(colour):
         return float(np.interp(colour, colours, mags, left=np.nan, right=np.nan))
@@ -202,8 +211,8 @@ def main():
     print("Обе ветви label=2 просматриваются от цвета к величине.")
     print("Условия однозначности:")
 
-    cav_interp = make_given_colour_interpolator(cav_pts)
-    bos_interp = make_given_colour_interpolator(bos_pts)
+    cav_interp = make_given_colour_interpolator(cav_pts, "Cavallo")
+    bos_interp = make_given_colour_interpolator(bos_pts, "Bossini")
 
     if cav_interp is None:
         print("  Cavallo: BP-RP не монотонен — остановка.")
@@ -215,8 +224,8 @@ def main():
     g_cav_fn, cav_c_min, cav_c_max = cav_interp
     g_bos_fn, bos_c_min, bos_c_max = bos_interp
 
-    print(f"  Cavallo label=2: BP−RP ∈ [{cav_c_min:.3f}, {cav_c_max:.3f}], монотонен")
-    print(f"  Bossini label=2: BP−RP ∈ [{bos_c_min:.3f}, {bos_c_max:.3f}], монотонен")
+    print(f"  Cavallo label=2: BP−RP ∈ [{cav_c_min:.3f}, {cav_c_max:.3f}]")
+    print(f"  Bossini label=2: BP−RP ∈ [{bos_c_min:.3f}, {bos_c_max:.3f}]")
 
     common_c_min = max(cav_c_min, bos_c_min)
     common_c_max = min(cav_c_max, bos_c_max)
@@ -234,9 +243,18 @@ def main():
         print("Сравнение преимущества Cavallo/Bossini не производилось.")
         sys.exit(0)
 
-    # Вычисляем ΔG на общей сетке
-    n_steps = 50
-    bp_grid = np.linspace(common_c_min, common_c_max, n_steps)
+    # Вычисляем ΔG на узлах обеих ветвей в общем интервале
+    # Собираем все узловые BP-RP из обеих моделей, попадающие в общий интервал
+    node_bps = set()
+    for g, c in cav_pts:
+        if common_c_min <= c <= common_c_max:
+            node_bps.add(round(c, 6))
+    for g, c in bos_pts:
+        if common_c_min <= c <= common_c_max:
+            node_bps.add(round(c, 6))
+
+    node_bps = sorted(node_bps)
+    bp_grid = np.array(node_bps)
     g_cav = np.array([g_cav_fn(c) for c in bp_grid])
     g_bos = np.array([g_bos_fn(c) for c in bp_grid])
     delta = g_cav - g_bos
@@ -248,14 +266,17 @@ def main():
         writer.writerow(["BP_RP", "G_Cavallo", "G_Bossini", "delta_G"])
         for c, gc, gb, d in zip(bp_grid, g_cav, g_bos, delta):
             writer.writerow([f"{c:.6f}", f"{gc:.6f}", f"{gb:.6f}", f"{d:.6f}"])
-    print(f"\nТаблица ΔG сохранена: {csv_path}")
+    print(f"\nТаблица ΔG сохранена: {csv_path} (по {len(node_bps)} узлам)")
 
     # Печать статистики
-    print(f"\n  ΔG на {n_steps} точках от BP−RP = {common_c_min:.3f} до {common_c_max:.3f}:")
-    print(f"    min ΔG = {float(np.min(delta)):.4f} mag")
+    print(f"\n  ΔG = G_Cavallo − G_Bossini на {len(node_bps)} узлах обеих ветвей")
+    print(f"    от BP−RP = {common_c_min:.3f} до {common_c_max:.3f}:")
+    print(f"    min ΔG = {float(np.min(delta)):.4f} mag (отрицательный → Cavallo ярче)")
     print(f"    max ΔG = {float(np.max(delta)):.4f} mag")
     print(f"    mean ΔG = {float(np.mean(delta)):.4f} mag")
-    print(f"    std  ΔG = {float(np.std(delta)):.4f} mag")
+    # Найдите макс расхождение и соответствующий BP-RP
+    argmax = np.argmax(np.abs(delta))
+    print(f"    Макс |ΔG| = {float(np.abs(delta)[argmax]):.4f} mag при BP−RP = {bp_grid[argmax]:.3f}")
 
     # ─────────────────────────────────────────────
     # 5. ΔG plot
@@ -270,9 +291,16 @@ def main():
                   fontsize=12)
     ax2.grid(True, alpha=0.3)
 
+    # Найти макс расхождение
+    argmax = int(np.argmax(np.abs(delta)))
+    max_bp = bp_grid[argmax]
+    max_dg = float(np.abs(delta)[argmax])
+
     # Подпись статистики
-    text = (f"Cavallo brighter by {abs(float(np.mean(delta))):.3f} mag on average\n"
-            f"Range: [{float(np.min(delta)):.3f}, {float(np.max(delta)):.3f}] mag")
+    text = (f"Cavallo brighter than Bossini\n"
+            f"ΔG = G_Cav − G_Bos = {float(np.mean(delta)):.3f} ± {float(np.std(delta)):.3f} mag\n"
+            f"Range [{float(np.min(delta)):.3f}, {float(np.max(delta)):.3f}]\n"
+            f"Max |ΔG| = {max_dg:.3f} mag at BP−RP = {max_bp:.3f}")
     ax2.text(0.98, 0.05, text, transform=ax2.transAxes, fontsize=10,
              ha="right", va="bottom", bbox=dict(boxstyle="round", fc="white", alpha=0.8))
 
@@ -282,6 +310,17 @@ def main():
     plt.close(fig2)
     print(f"\nГрафик ΔG сохранён: {delta_path}")
 
+    # Интерпретация
+    mean_d = float(np.mean(delta))
+    if mean_d < 0:
+        interp = (f"ИТОГ: На всём общем интервале BP−RP "
+                  f"Cavallo ярче Bossini на {abs(mean_d):.3f} mag "
+                  f"(ΔG = G_Cav − G_Bos < 0). "
+                  f"Максимальное расхождение {max_dg:.3f} mag при BP−RP = {max_bp:.3f}.")
+    else:
+        interp = (f"ИТОГ: На всём общем интервале BP−RP "
+                  f"Bossini ярче Cavallo на {mean_d:.3f} mag.")
+    print(f"\n  {interp}")
     print("\nСравнение преимущества Cavallo/Bossini не производилось.")
     print("=" * 70)
 

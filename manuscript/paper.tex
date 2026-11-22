@@ -44,7 +44,7 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-We compare two main-sequence reconstructions for the open cluster M67 (NGC 2682) based on published parameters from Cavallo et al. (2024) and Bossini et al. (2019). Using a common sample of 1279 Gaia DR3 members with $G \leq 18$, we compute the colour residual $r = (BP-RP)_{\rm obs} - (BP-RP)_{\rm model}$ at fixed apparent magnitude $G$ for three intervals: $[15, 16)$, $[16, 17)$, and $[17, 18]$. The difference $D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|)$ is positive in $[15, 16)$ ($D = 0.0533$, 98.33\% CI $[0.0441, 0.0619]$, $n = 235$), indicating smaller typical absolute residuals for Bossini. In $[16, 17)$, $D = -0.0195$ (98.33\% CI $[-0.0294, -0.0096]$, $n = 204$), favouring Cavallo. In $[17, 18]$, $D = -0.0063$ (98.33\% CI $[-0.0200, 0.0037]$, $n = 219$), and the interval includes zero. The Bonferroni correction yields a joint nominal level of 95\% for the three $G$ intervals within each sample. The result in $[15, 16)$ is robust to restricting to stars within the tidal radius ($n = 143$). Both reconstructions use PARSEC 1.2S isochrones with identical photometric transformations, so the differences reflect the combined effect of distinct age, metallicity, extinction, and distance parameters.
+We compare two main-sequence reconstructions for the open cluster M67 (NGC 2682) based on published parameters from Cavallo et al. (2024) and Bossini et al. (2019). Using a common sample of 1279 Gaia DR3 members with $G \leq 18$, we compute the colour residual $r = (BP-RP)_{\rm obs} - (BP-RP)_{\rm model}$ at fixed apparent magnitude $G$ for three intervals: $[15, 16)$, $[16, 17)$, and $[17, 18]$. The difference $D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|)$ is positive in $[15, 16)$ ($D = 0.0533$, 98.33\% CI $[0.0441, 0.0619]$, $n = 235$), indicating smaller typical absolute residuals for Bossini. In $[16, 17)$, $D = -0.0195$ (98.33\% CI $[-0.0294, -0.0096]$, $n = 204$), favouring Cavallo. In $[17, 18]$, $D = -0.0063$ (98.33\% CI $[-0.0200, 0.0037]$, $n = 219$), and the interval includes zero. The Bonferroni correction yields a joint nominal level of 95\% for the three $G$ intervals within each sample. The result in $[15, 16)$ is robust to restricting to stars within the tidal radius ($n = 143$). Both reconstructions use PARSEC 1.2S isochrones with identical photometric transformations, so the differences reflect the combined effect of distinct age, metallicity, extinction, and distance parameters. In the turnoff region ($11.5 \le G < 13.5$), we select 35 subgiant candidates and compare the predicted brightness of the subgiant branch (label=2): Cavallo predicts a systematically brighter subgiant branch than Bossini by $0.73 \pm 0.07$ mag at the same colour, with the maximum discrepancy of $0.82$ mag occurring at $BP-RP = 0.949$.
 \end{abstract}
 
 \section{Introduction}
@@ -154,6 +154,28 @@ Figure~\ref{fig:cmd_comparison} shows the CMD with both isochrones overlaid on t
 
 The result in $[15, 16)$ is robust to the $inrt$ restriction: the sign of $D$ remains positive, the confidence interval continues to exclude zero, and the magnitude of $D$ increases slightly from $0.0533$ to $0.0574$ mag. In $[16, 17)$, the sign remains negative but the absolute value of $D$ decreases slightly. In $[17, 18]$, the sign of $D$ flips from negative to positive in the $inrt$ sub-sample, but the interval includes zero in both cases.
 
+\subsection{Turnoff region}
+\label{sec:turnoff}
+
+We additionally examine the turnoff region ($11.5 \le G < 13.5$), where 257 Gaia DR3 members are present. The S1 subgiant selection (rolling median $+0.10$ mag threshold) identifies 35 candidates, independently verified from the raw catalogue. Figure~\ref{fig:turnoff_cmd} shows the region with the subgiant branch (label~=~2) of both models. Over the common colour range $0.775 \le BP-RP \le 1.094$,
+\begin{equation}
+  \Delta G(BP-RP) = G_{\rm Cavallo}(BP-RP) - G_{\rm Bossini}(BP-RP)
+\end{equation}
+is negative throughout: Cavallo predicts a \emph{brighter} subgiant branch at the same colour by $-0.73 \pm 0.07$ mag, with a maximum discrepancy of $0.82$ mag at $BP-RP = 0.949$.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/figure2.pdf}
+  \caption{
+    M67 turnoff region ($11.5 \le G < 13.5$).
+    Grey points: 257 Gaia DR3 members; red dots: 35 S1 subgiant candidates.
+    Thin grey lines: full isochrones (all phases).
+    Thick lines: subgiant branch (label~=~2)
+    for Cavallo et al.\ (2024, red) and Bossini et al.\ (2019, blue).
+  }
+  \label{fig:turnoff_cmd}
+\end{figure}
+
 \section{Discussion}
 \label{sec:discussion}
 
@@ -184,7 +206,7 @@ The script rebuilds the two reconstructions, computes the residuals, checks memb
 \section{Conclusion}
 \label{sec:conclusion}
 
-We compared two main-sequence isochrone reconstructions for M67 based on published parameters from Cavallo et al. (2024) and Bossini et al. (2019). In the magnitude interval $[15, 16)$, Bossini yields a significantly smaller typical absolute colour residual ($D = 0.0533$ mag, 98.33\% CI $[0.0441, 0.0619]$), a result that is robust to restricting to stars within the tidal radius. In $[16, 17)$, Cavallo performs slightly better ($D = -0.0195$ mag, 98.33\% CI $[-0.0294, -0.0096]$). In $[17, 18]$, no robust difference is detected ($D = -0.0063$ mag, 98.33\% CI $[-0.0200, 0.0037]$). Restricting the sample to stars within the tidal radius preserves this pattern across all three magnitude bins.
+We compared two main-sequence isochrone reconstructions for M67. In $[15, 16)$, Bossini yields a smaller typical colour residual ($D = 0.0533$ mag, 98.33\% CI $[0.0441, 0.0619]$); in $[16, 17)$, Cavallo performs slightly better ($D = -0.0195$, CI $[-0.0294, -0.0096]$); in $[17, 18]$, no robust difference is detected. These patterns persist within the tidal radius. In the turnoff region, Cavallo's subgiant branch is systematically brighter by $0.73 \pm 0.07$ mag at the same colour.
 
 \begin{aiusage}[Goose sessions used Qwen3.6-35B-A3B, GPT-4.1 mini and DeepSeek V4 Flash.]
   Table~\ref{tab:results} & \generated{} & Goose & verified against CSV \\
@@ -196,6 +218,8 @@ We compared two main-sequence isochrone reconstructions for M67 based on publish
   Section~\ref{sec:reproducibility} & \generated{} & Goose & verified against project structure \\
   Section~\ref{sec:conclusion} & \generated{} & Goose & consistent with results \\
   Figure~\ref{fig:cmd_comparison} & \generated{} & Goose & verified against \path{figures/figure1.pdf} \\
+  Figure~\ref{fig:turnoff_cmd} & \generated{} & Goose & verified against \path{figures/figure2.pdf} \\
+  Section~\ref{sec:turnoff} & \generated{} & Goose & verified against CSV and run output \\
   Text and captions & \generated{} & Goose & Reviewed by the author \\
 \end{aiusage}
 
