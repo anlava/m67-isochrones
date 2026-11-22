@@ -107,10 +107,12 @@ is the model colour at the same $G$ (interpolated along $\mathrm{label}=1$). The
 metric is $D = \mathrm{median}(|r_{\rm Cavallo}|) - \mathrm{median}(|r_{\rm Bossini}|)$,
 with 98.33\% bootstrap confidence intervals (Bonferroni-corrected for three bins).
 
-\textbf{Age fit.} For each grid we compute for all 257 turnoff stars the Euclidean distance to
-the nearest point on each isochrone polyline (segment-projected, not vertex-only):
+\textbf{Age fit.} Let $C = G_{\rm BP} - G_{\rm RP}$ denote the observed colour and
+$\mathcal{I} \subset \mathbb{R}^2$ the polyline formed by the isochrone points.
+For each of the 257 turnoff stars we compute the Euclidean distance to the
+nearest point on $\mathcal{I}$ (segment-projected, not vertex-only):
 \begin{equation}\label{eq:distance}
-  D_i = \min_{\mathrm{segments}}\sqrt{(G_i - G_m)^2 + ((BP-RP)_i - (BP-RP)_m)^2}.
+  D_i = \min_{(g,c)\in\mathcal{I}}\sqrt{(G_i - g)^2 + (C_i - c)^2}.
 \end{equation}
 The grid metric is $M = \mathrm{median}(D_1,\dots,D_{257})$, evaluated at each of the nine
 $\log t$ nodes. The best age minimises $M$. A synthetic test (Kroupa IMF, 15\% binary fraction,
