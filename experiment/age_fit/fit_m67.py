@@ -45,7 +45,15 @@ def crosscheck_colours():
             except ValueError:
                 continue
             if 11.5 <= g < 13.5:
-                tsv[cols[1].strip()] = {"g": g, "bp_rp": bp - rp}
+                gaia = cols[1].strip()
+                if gaia in tsv:
+                    print(f"    DUPLICATE GaiaDR3 in TSV: {gaia}")
+                    return False
+                tsv[gaia] = {"g": g, "bp_rp": bp - rp}
+
+    if len(tsv) != 257:
+        print(f"✗  TSV: expected 257 unique GaiaDR3, got {len(tsv)}")
+        return False
 
     # Read CSV — select same filter 11.5 ≤ G < 13.5
     sel = {}
@@ -59,9 +67,8 @@ def crosscheck_colours():
                     return False
                 sel[gaia] = float(r["BP_RP"])
 
-    # Same number?
-    if len(tsv) != len(sel):
-        print(f"✗  SIZE MISMATCH: TSV={len(tsv)}, CSV={len(sel)}")
+    if len(sel) != 257:
+        print(f"✗  CSV: expected 257 unique GaiaDR3, got {len(sel)}")
         return False
 
     # Same IDs?
