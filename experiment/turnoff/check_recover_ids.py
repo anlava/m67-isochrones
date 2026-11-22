@@ -99,29 +99,29 @@ def select_turnoff(members):
 
 
 def rule_S1(stars):
-    """Правило S1: скользящая медиана + 0.10 mag."""
+    """Правило S1: скользящая медиана + 0.10 mag.
+
+    Окно [G-0.25, G+0.25] (обе границы включены).
+    Медиана — numpy.median (среднее двух центральных при чётном N).
+    """
+    import numpy as np  # импорт здесь, чтобы не тянуть numpy на весь скрипт
+
     if not stars:
         return set()
-    # Сортируем по G
     sorted_stars = sorted(stars, key=lambda s: s["Gmag"])
-    g_vals = [s["Gmag"] for s in sorted_stars]
-    bp_rp_vals = [s["BPmag"] - s["RPmag"] for s in sorted_stars]
+    g_vals = np.array([s["Gmag"] for s in sorted_stars])
+    bp_rp_vals = np.array([s["BPmag"] - s["RPmag"] for s in sorted_stars])
 
     selected = set()
     window = 0.5  # mag
-    step = 0.05   # mag
 
-    # Строим опорную линию: медиана в окне, интерполированная на каждую звезду
-    # Для каждой звезды: собираем цвета всех звёзд в окне [G-window/2, G+window/2]
     for i, s in enumerate(sorted_stars):
         g = s["Gmag"]
         lo, hi = g - window / 2, g + window / 2
-        neigh_cols = [bp_rp_vals[j] for j in range(len(sorted_stars))
-                      if lo <= g_vals[j] <= hi]
-        if not neigh_cols:
+        mask = (g_vals >= lo) & (g_vals <= hi)
+        if not np.any(mask):
             continue
-        neigh_cols.sort()
-        median = neigh_cols[len(neigh_cols) // 2]
+        median = float(np.median(bp_rp_vals[mask]))
         bp_rp = s["BPmag"] - s["RPmag"]
         if bp_rp > median + 0.10:
             selected.add(s["GaiaDR3"])
