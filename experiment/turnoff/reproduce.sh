@@ -56,4 +56,8 @@ else
 fi
 
 echo ""
+echo "=== 6. CMD с изохронами и ΔG на label=2 ==="
+$PYTHON experiment/turnoff/plot_turnoff_isochrones.py
+
+echo ""
 echo "=== Воспроизведение завершено. Сравнение моделей не производилось. ==="
